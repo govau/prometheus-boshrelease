@@ -6,9 +6,13 @@
   path: /releases/-
   value:
     name: influxdb
-    version: 0.1.0-govau
-    sha1: c58eecf07c3d86138bb59453b07f78642fd84328
-    url: https://github.com/govau/influxdb-boshrelease/releases/download/v0.1.0-govau/influxdb-0.1.0-govau.tgz
+    version: latest
+
+# use BOSH DNS.
+# required to in order to setup certificate CN
+- type: replace
+  path: /features?/use_dns_addresses
+  value: true
 
 - type: replace
   path: /instance_groups/-
@@ -29,6 +33,7 @@
           influxdb: {as: influxdb}
         properties:
           influxdb:
+            auth_enabled: true
             database: prometheus
             user: ((influxdb_user.username))
             password: ((influxdb_user.password))
@@ -36,7 +41,10 @@
             http:
               tls:
                 enabled: true
-                cert: ((influxdb_cert))
+                cert:
+                  certificate: ((influxdb_cert.certificate))
+                  ca: ((influxdb_cert.ca))
+                  private_key: ((influxdb_cert.private_key))
 
 # Influxdb username/password
 - type: replace
@@ -61,7 +69,7 @@
     name: influxdb_cert
     type: certificate
     options:
-      ca: influxdb_ca
-      common_name: "todo.figure.this.name.out.needs.to.match.bosh.address"
-      alternative_names: ["todo.figure.this.name.out.needs.to.match.bosh.address"]
+      ca: influxdb_ca_cert
+      common_name: "*.influxdb.default.prometheus.bosh"
+      alternative_names: ["*.influxdb.default.prometheus.bosh"]
       extended_key_usage: ["server_auth"]

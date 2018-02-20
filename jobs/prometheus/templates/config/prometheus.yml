@@ -28,18 +28,8 @@ scrape_configs: <%= p('prometheus.scrape_configs', []).to_json %>
 alerting: <%= p('prometheus.alerting', {}).to_json %>
 
 <%
-  if_p('prometheus.remote_write') do |remote_write|
-    rem_write = remote_write.dup
-  else
-    rem_write = Array.new
-  end
-
-  rem_read = Array.new
-  if_p('prometheus.remote_read') do |remote_read|
-    rem_read = remote_read.dup
-  else
-    rem_read = Array.new
-  end
+  rem_write = p('prometheus.remote_write', []).dup
+  rem_read = p('prometheus.remote_read', []).dup
 
   if_link('influxdb') do |influxdb_link|
     influxdb_host     = influxdb_link.instances.first.address
