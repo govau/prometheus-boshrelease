@@ -8,6 +8,7 @@ templates:
   bin/prometheus_ctl: bin/prometheus_ctl
   config/prometheus.yml: config/prometheus.yml
   config/custom.rules: config/custom.rules
+  config/influxdb_ca_cert.pem: config/influxdb_ca_cert.pem
 
 provides:
   - name: prometheus
