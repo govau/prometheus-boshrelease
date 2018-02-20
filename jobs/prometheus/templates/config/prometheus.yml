@@ -48,7 +48,7 @@ alerting: <%= p('prometheus.alerting', {}).to_json %>
     influxdb_password = influxdb_link.p("influxdb.password")
     influxdb_port     = influxdb_link.p("influxdb.http.port")
 
-    influxdb_timeout  = p('influxdb_timeout')
+    influxdb_timeout  = p('prometheus.influxdb_timeout')
 
     rem_write << {
       :url            => "https://#{influxdb_host}:#{influxdb_port}/api/v1/prom/write?db=#{influxdb_database}",
