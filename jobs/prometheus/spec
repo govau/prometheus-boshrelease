@@ -117,3 +117,7 @@ properties:
     description: "Path under which to expose metric"
   prometheus.web.user_assets:
     description: "Path to static asset directory, available at /user"
+
+  prometheus.influxdb_timeout:
+    description: "If linking with influxdb, timeout."
+    default: "30s"

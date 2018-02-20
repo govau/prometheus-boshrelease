@@ -33,18 +33,10 @@
             user: ((influxdb_user.username))
             password: ((influxdb_user.password))
             retention: 30d
-
-# set a key/value in remote_write to help with BOSH template `prometheus.yml`
-- type: replace
-  path: /instance_groups/name=prometheus/jobs/name=prometheus/properties/prometheus/remote_write?/-
-  value:
-    remote_timeout: 30s
-
-# set a key/value in remote_read to help with BOSH template `prometheus.yml`
-- type: replace
-  path: /instance_groups/name=prometheus/jobs/name=prometheus/properties/prometheus/remote_read?/-
-  value:
-    remote_timeout: 30s
+            http:
+              tls:
+                enabled: true
+                cert: ((influxdb_cert))
 
 # Influxdb username/password
 - type: replace
@@ -52,3 +44,24 @@
   value:
     name: influxdb_user
     type: user
+
+# Influxdb CA cert
+- type: replace
+  path: /variables/-
+  value:
+    name: influxdb_ca_cert
+    type: certificate
+    options:
+      is_ca: true
+      common_name: influxdb_ca
+
+- type: replace
+  path: /variables/-
+  value:
+    name: influxdb_cert
+    type: certificate
+    options:
+      ca: influxdb_ca
+      common_name: "todo.figure.this.name.out.needs.to.match.bosh.address"
+      alternative_names: ["todo.figure.this.name.out.needs.to.match.bosh.address"]
+      extended_key_usage: ["server_auth"]
