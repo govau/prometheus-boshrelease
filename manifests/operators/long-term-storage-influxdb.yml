@@ -6,7 +6,10 @@
   path: /releases/-
   value:
     name: influxdb
-    version: latest
+    version: 0.2.0-govau
+    sha1: ad07658ebd2de88dbcb399bbdadd4b684001921c
+    url: https://github.com/govau/influxdb-boshrelease/releases/download/v0.2.0-govau/influxdb-0.2.0-govau.tgz
+
 
 # use BOSH DNS.
 # required to in order to setup certificate CN
