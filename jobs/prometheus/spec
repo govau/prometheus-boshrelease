@@ -8,6 +8,7 @@ templates:
   bin/prometheus_ctl: bin/prometheus_ctl
   config/prometheus.yml: config/prometheus.yml
   config/custom.rules: config/custom.rules
+  config/influxdb_ca_cert.pem: config/influxdb_ca_cert.pem
 
 provides:
   - name: prometheus
@@ -116,3 +117,7 @@ properties:
     description: "Path under which to expose metric"
   prometheus.web.user_assets:
     description: "Path to static asset directory, available at /user"
+
+  prometheus.influxdb_timeout:
+    description: "If linking with influxdb, timeout."
+    default: "30s"
