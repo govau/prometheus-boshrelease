@@ -1,0 +1,78 @@
+---
+
+# fork of https://github.com/concourse/influxdb-boshrelease
+# includes influxdb 1.4.3 (prometheus support) and bosh linking
+- type: replace
+  path: /releases/-
+  value:
+    name: influxdb
+    version: 0.2.0-govau
+    sha1: ad07658ebd2de88dbcb399bbdadd4b684001921c
+    url: https://github.com/govau/influxdb-boshrelease/releases/download/v0.2.0-govau/influxdb-0.2.0-govau.tgz
+
+
+# use BOSH DNS.
+# required to in order to setup certificate CN
+- type: replace
+  path: /features?/use_dns_addresses
+  value: true
+
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: influxdb
+    azs:
+      - z1
+    instances: 1
+    vm_type: default
+    persistent_disk: 10_240
+    stemcell: default
+    networks:
+      - name: default
+    jobs:
+      - name: influxdb
+        release: influxdb
+        provides:
+          influxdb: {as: influxdb}
+        properties:
+          influxdb:
+            auth_enabled: true
+            database: prometheus
+            user: ((influxdb_user.username))
+            password: ((influxdb_user.password))
+            retention: 30d
+            http:
+              tls:
+                enabled: true
+                cert:
+                  certificate: ((influxdb_cert.certificate))
+                  ca: ((influxdb_cert.ca))
+                  private_key: ((influxdb_cert.private_key))
+
+# Influxdb username/password
+- type: replace
+  path: /variables/-
+  value:
+    name: influxdb_user
+    type: user
+
+# Influxdb CA cert
+- type: replace
+  path: /variables/-
+  value:
+    name: influxdb_ca_cert
+    type: certificate
+    options:
+      is_ca: true
+      common_name: influxdb_ca
+
+- type: replace
+  path: /variables/-
+  value:
+    name: influxdb_cert
+    type: certificate
+    options:
+      ca: influxdb_ca_cert
+      common_name: "*.influxdb.default.prometheus.bosh"
+      alternative_names: ["*.influxdb.default.prometheus.bosh"]
+      extended_key_usage: ["server_auth"]

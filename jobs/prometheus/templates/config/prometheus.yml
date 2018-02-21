@@ -27,12 +27,37 @@ scrape_configs: <%= p('prometheus.scrape_configs', []).to_json %>
 # Alerting specifies settings related to the Alertmanager.
 alerting: <%= p('prometheus.alerting', {}).to_json %>
 
-<% if_p('prometheus.remote_write') do |remote_write| %>
-# Settings related to the experimental remote write feature.
-remote_write: <%= remote_write.to_json %>
-<% end %>
+<%
+  rem_write = p('prometheus.remote_write', []).dup
+  rem_read = p('prometheus.remote_read', []).dup
 
-<% if_p('prometheus.remote_read') do |remote_read| %>
+  if_link('influxdb') do |influxdb_link|
+    influxdb_host     = influxdb_link.instances.first.address
+    influxdb_database = influxdb_link.p("influxdb.database")
+    influxdb_username = influxdb_link.p("influxdb.user")
+    influxdb_password = influxdb_link.p("influxdb.password")
+    influxdb_port     = influxdb_link.p("influxdb.http.port")
+
+    influxdb_timeout  = p('prometheus.influxdb_timeout')
+
+    rem_write << {
+      :url            => "https://#{influxdb_host}:#{influxdb_port}/api/v1/prom/write?db=#{influxdb_database}",
+      :tls_config     => {:ca_file => "/var/vcap/jobs/prometheus/config/influxdb_ca_cert.pem"},
+      :basic_auth     => {:username => influxdb_username, :password => influxdb_password},
+      :remote_timeout => influxdb_timeout,
+    }
+
+    rem_read << {
+      :url            => "https://#{influxdb_host}:#{influxdb_port}/api/v1/prom/read?db=#{influxdb_database}",
+      :tls_config     => {:ca_file => "/var/vcap/jobs/prometheus/config/influxdb_ca_cert.pem"},
+      :basic_auth     => {:username => influxdb_username, :password => influxdb_password},
+      :remote_timeout => influxdb_timeout,
+    }
+  end
+%>
+
+# Settings related to the experimental remote write feature.
+remote_write: <%= rem_write.to_json %>
+
 # Settings related to the experimental remote read feature.
-remote_read: <%= remote_read.to_json %>
-<% end %>
+remote_read: <%= rem_read.to_json %>
